@@ -1,2 +1,2 @@
 # CBIT
-Cattle Breeds Identification Tools
+Cattle Breeds Identification Tool
