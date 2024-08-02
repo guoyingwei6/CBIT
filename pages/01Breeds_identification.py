@@ -4,6 +4,10 @@ import streamlit as st
 import joblib
 from sklearn.svm import SVC
 
+###todo:
+### 1. st.tab开发两个版本的文件上传，一个是array，一个是plink格式
+### 2. st.session_state保存用户上传的文件
+
 
 # 从文件中读取品种代码，传入字典中
 def load_breed_codes():
