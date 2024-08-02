@@ -8,6 +8,8 @@ from sklearn.svm import SVC
 ### 1. st.tab开发两个版本的文件上传，一个是array，一个是plink格式
 ### 2. st.session_state保存用户上传的文件
 
+# 设置页面配置
+st.set_page_config(page_title="Breed_identification",page_icon="🐂",layout="centered",initial_sidebar_state="expanded")
 
 # 从文件中读取品种代码，传入字典中
 def load_breed_codes():
@@ -67,5 +69,3 @@ def page_frame():
 # 主应用逻辑，调用开始分析的函数
 if __name__ == '__main__':
     page_frame()
-    load_breed_codes()
-    load_model()
