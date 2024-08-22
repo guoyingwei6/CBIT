@@ -3,18 +3,24 @@ import pandas as pd
 import streamlit as st
 import joblib
 from sklearn.svm import SVC
+from modules.common import show_footer
+
+
+###todo:
+### 1. st.tab开发两个版本的文件上传，一个是array，一个是plink格式
+### 2. 添加2000模型
 
 # 设置页面配置
 st.set_page_config(page_title="Breed Identification", page_icon="🐂", layout="centered", initial_sidebar_state="expanded")
 
-@st.cache_data()
+@st.cache_data(ttl=3600)
 def load_breed_codes():
     """从文件中读取品种代码，传入字典中。"""
     df = pd.read_csv('attachments/breed_code.csv')
     code_breed_dict = pd.Series(df.Breed.values, index=df.Code).to_dict()
     return code_breed_dict
 
-@st.cache_data()
+@st.cache_resource(ttl=3600)
 def load_model():
     """加载模型。"""
     clf = joblib.load('attachments/SVC_500_best.pkl')
@@ -55,3 +61,4 @@ def page_frame():
 
 if __name__ == '__main__':
     page_frame()
+    show_footer()

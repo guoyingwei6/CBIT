@@ -1,17 +1,10 @@
 import streamlit as st
 from modules.common import show_footer
 
-st.set_page_config(page_title="About",page_icon="💻",layout="centered",initial_sidebar_state="expanded")
-st.title('About this tool')
-
-st.write('This tool is designed to help you identify different breeds of cattle.')
-
-
-st.header('Contact')
-st.write('If you have any questions, please contact us at: yingwei.guo@foxmail.com')
-
 def main():
+    st.set_page_config(page_title="Breed Identification Tutorial", page_icon="📘", layout="centered")
 
+    st.title('Breed Identification Tool Tutorial')
 
     st.markdown("""
     ## Introduction
@@ -50,4 +43,3 @@ def main():
 if __name__ == '__main__':
     main()
     show_footer()
-

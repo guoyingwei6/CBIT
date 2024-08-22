@@ -17,7 +17,7 @@ def show_footer():
     }
     </style>
     <div class="footer">
-        <p>All rights reserved. ©Institute of Animal Science (IAS) of Chinese Academy of Agricultural Sciences (CAAS). Contact us at <a href="mailto:yingwei.guo@foxmail.com">yingwei.guo@foxmail.com</a></p>
+        <p>All rights reserved. ©Institute of Animal Science (IAS) of Chinese Academy of Agricultural Sciences (CAAS).\n Contact us at <a href="mailto:yingwei.guo@foxmail.com">yingwei.guo@foxmail.com</a></p>
     </div>
     """
     st.markdown(footer, unsafe_allow_html=True)
