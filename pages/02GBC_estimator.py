@@ -6,7 +6,14 @@ import joblib
 
 # 设置页面配置
 st.set_page_config(page_title="GBC estimator", page_icon="🐂", layout="centered", initial_sidebar_state="expanded")
+st.title('GBC estimator')
+st.markdown("""
+            ## Introduction
+            This tool is designed to help you estimate the genetic contributions of different breeds in a mixed breed cattle population.  
+            The tool uses a linear model to estimate the genetic contributions of different breeds based on genotype data.
 
+            ## Analysis
+            Please upload a genotype file to begin the analysis.""")
 
 @st.cache_data(ttl=3600)
 def load_AF():
@@ -37,30 +44,22 @@ def GBC_estimator(genotypes, confidence=0.05):
     # 循环处理每个个体
     for i in range(filtered_genotypes.shape[1]):
         genotype = filtered_genotypes.iloc[:, i].values  # 获取第i个个体的基因型数据
-        
         # 构建线性模型，无截距
         X = allele_freqs_matrix
         model = sm.OLS(genotype, X)
         results = model.fit()
-
         # 提取系数（b向量）
         coefficients = results.params
-
         # 将负系数转换为0
         coefficients[coefficients < 0] = 0
-
         # 计算每个品种的遗传贡献比例
-        contributions = coefficients / sum(coefficients)
-        
+        contributions = coefficients / sum(coefficients)  
         # 将contributions中小于0.02的系数转换为0
         contributions[contributions < confidence] = 0
-
         # 再次计算每个品种的遗传贡献比例
         contributions = contributions / sum(contributions)
-
         # 存储到字典
         contributions_dict[filtered_genotypes.columns[i]] = contributions
-
     # 使用字典创建DataFrame，索引设置为品种名称
     individual_contributions_rounded = pd.DataFrame(contributions_dict, index=filtered_allele_freqs.columns).round(4)
 
