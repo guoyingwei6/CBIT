@@ -33,7 +33,8 @@ st.markdown("""
             The first column should be the SNP ID (CHR:POS) and the first row should be the sample ID.            
             - The file should be in the format of a **space or tab-separated** text file.
             - More accurate results depend on more SNPs. We recommend using a file with **at least 1000 SNPs**, and **50,000 SNPs** above are highly recommended.
-            - If you don't have a genotype file now or want to see the details of the file format, you can download the example file [here](www.baidu.com).
+            - If you don't have a genotype file now or want to see the details of the file format, 
+            you can download the example file [here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotype_examples_for_GBC_extimator.txt).
             
             **2. Set the confidence threshold to filter out minor contributions.**
             - The minor contributions will be filtered out based on the confidence threshold you set. 
