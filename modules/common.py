@@ -21,3 +21,13 @@ def show_footer():
     </div>
     """
     st.markdown(footer, unsafe_allow_html=True)
+
+def load_css():
+    st.markdown("""
+        <style>
+        html, body, [class*="css"] {
+            font-size: 18px;  # 设置字体大小
+            font-family: 'Garamond', serif;  # 设置字体
+        }
+        </style>
+        """, unsafe_allow_html=True)

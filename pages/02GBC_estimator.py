@@ -3,15 +3,51 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import joblib
+from modules.common import show_footer, load_css
 
 # 设置页面配置
 st.set_page_config(page_title="GBC estimator", page_icon="🐂", layout="centered", initial_sidebar_state="expanded")
 st.title('GBC estimator')
 st.markdown("""
             ## Introduction
-            This tool is designed to help you estimate the genetic contributions of different breeds in a mixed breed cattle population.  
-            The tool uses a linear model to estimate the genetic contributions of different breeds based on genotype data.
+            This tool is designed to help you estimate the genomic breed content (GBC) in a mixed breed cattle population.  
+            
+            We estimate the GBC using a linear model based on the genotype data:
+            $$
+            y = Fb + e
+            $$
+            where $y$ is the genotype vector ($M \\times 1$) of all $M$ SNPs of the individual to be estimated,
+            and the SNP genotypes are represented by $0$ (AA), $1$ (AB), and $2$ (BB) respectively. 
+            $F$ is the allele frequency matrix with $M \\times T$, 
+            where $T$ is the number of breeds in the reference popution.
+            The regression coefficient vector $b$ ($T \\times 1$) is the GBC of each breed to the individual to be estimated.
+            $e$ is the error term.  
+            
+            Then, we solve the linear model using ordinary least squares (OLS) regression, where $\hat{b} = (F^{\prime} F)^{-1}F^{\prime}y$.  
+            
+            Finally, we normalize the regression coefficients to sum to 1 and filter out minor contributions based on a confidence threshold.
+            
+            ## Usuage
+            **1. Upload the genotype file.**
+            - A genotype file is needed like PLINK ped format but only individual name and genotypes, with one individual per line.
+            - More accurate results depend on more SNPs. We recommend using a file with at least 1000 SNPs, and 50,000 SNPs above are highly recommended.
+            - If you don't have a genotype file now or want to see the details of the file format, you can download the example file [here](www.baidu.com).
+            
+            **2. Set the confidence threshold to filter out minor contributions.**
+            - The minor contributions will be filtered out based on the confidence threshold you set. 
+            - A larger threshold will exclude the interference from irrelevant breeds, 
+            but there is also a risk of overestimating the true contributions of some breeds. Smaller thresholds have the opposite effect. 
+            - By experience, a threshold between 0.02 and 0.1 is appropriate. 
+            We recommend a threshold of 0.05 by default, it can be changed according to your data and expectations.
 
+            **3. Click the 'Analyze' button to estimate the GBC.**
+            - The analysis will take a few seconds to complete, depending on the size of the genotype file. 
+            - Based on prior exprience, a file with 100 samples and 200,000 SNPs will take about 100 seconds (one sample per second).
+            - Smaller sample size and SNPs dataset will take less time.  
+
+            **4. The results will be displayed as a table, showing the GBC of each breed for each individual.**
+            - You can save the results as a CSV file by click the download button in the upper right corner.
+            
             ## Analysis
             Please upload a genotype file to begin the analysis.""")
 
@@ -86,4 +122,6 @@ def upload_gt():
 
 
 if __name__ == '__main__':
+    load_css()
     upload_gt()
+    show_footer()

@@ -1,5 +1,5 @@
 import streamlit as st
-from modules.common import show_footer
+from modules.common import show_footer, load_css
 
 st.set_page_config(page_title="About",page_icon="💻",layout="centered",initial_sidebar_state="expanded")
 st.title('About')
@@ -48,6 +48,7 @@ def main():
     """, unsafe_allow_html=False)
 
 if __name__ == '__main__':
+    load_css()
     main()
     show_footer()
 

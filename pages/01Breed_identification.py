@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 import joblib
 from sklearn.svm import SVC
-from modules.common import show_footer
+from modules.common import show_footer, load_css
 
 
 ###todo:
@@ -60,5 +60,6 @@ def page_frame():
             st.error("No genotype data to analyze. Please upload a file.")
 
 if __name__ == '__main__':
+    load_css()
     page_frame()
     show_footer()
