@@ -1,5 +1,5 @@
 import streamlit as st
-from modules.common import show_footer
+from modules.common import show_footer, load_css
 
 st.set_page_config(page_title="Home",page_icon="🏠",layout="centered",initial_sidebar_state="expanded")
 
@@ -23,4 +23,5 @@ st.markdown('![image.png](https://picbed.guoyingwei.top/2024/08/202408051048682.
 
 
 if __name__ == '__main__':
+    load_css()
     show_footer()

@@ -40,7 +40,7 @@ st.markdown("""
             - The minor contributions will be filtered out based on the confidence threshold you set. 
             - A larger threshold will exclude the interference from irrelevant breeds, 
             but there is also a risk of overestimating the true contributions of some breeds. Smaller thresholds have the opposite effect. 
-            - By experience, a threshold between **0.02** and **0.1** is appropriate. 
+            - By experience, a threshold between **0.02** (using about 200,000 SNPs) and **0.1** (5,000 SNPs below) is appropriate. 
             We recommend a threshold of **0.05** by default, it can be changed according to your data and expectations.
 
             **3. Click the 'Analyze' button to estimate the GBC.**
