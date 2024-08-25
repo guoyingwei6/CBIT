@@ -23,26 +23,28 @@ st.markdown("""
             The regression coefficient vector $b$ ($T \\times 1$) is the GBC of each breed to the individual to be estimated.
             $e$ is the error term.  
             
-            Then, we solve the linear model using ordinary least squares (OLS) regression, where $\hat{b} = (F^{\prime} F)^{-1}F^{\prime}y$.  
+            Then, we solve the linear model using **ordinary least squares (OLS) regression**, where $\hat{b} = (F^{\prime} F)^{-1}F^{\prime}y$.  
             
             Finally, we normalize the regression coefficients to sum to 1 and filter out minor contributions based on a confidence threshold.
             
             ## Usuage
             **1. Upload the genotype file.**
-            - A genotype file is needed like PLINK ped format but only individual name and genotypes, with one individual per line.
-            - More accurate results depend on more SNPs. We recommend using a file with at least 1000 SNPs, and 50,000 SNPs above are highly recommended.
+            - A genotype file is needed with **one individual per column and one SNP per line with header and index**. 
+            The first column should be the SNP ID (CHR:POS) and the first row should be the sample ID.            
+            - The file should be in the format of a **space or tab-separated** text file.
+            - More accurate results depend on more SNPs. We recommend using a file with **at least 1000 SNPs**, and **50,000 SNPs** above are highly recommended.
             - If you don't have a genotype file now or want to see the details of the file format, you can download the example file [here](www.baidu.com).
             
             **2. Set the confidence threshold to filter out minor contributions.**
             - The minor contributions will be filtered out based on the confidence threshold you set. 
             - A larger threshold will exclude the interference from irrelevant breeds, 
             but there is also a risk of overestimating the true contributions of some breeds. Smaller thresholds have the opposite effect. 
-            - By experience, a threshold between 0.02 and 0.1 is appropriate. 
-            We recommend a threshold of 0.05 by default, it can be changed according to your data and expectations.
+            - By experience, a threshold between **0.02** and **0.1** is appropriate. 
+            We recommend a threshold of **0.05** by default, it can be changed according to your data and expectations.
 
             **3. Click the 'Analyze' button to estimate the GBC.**
             - The analysis will take a few seconds to complete, depending on the size of the genotype file. 
-            - Based on prior exprience, a file with 100 samples and 200,000 SNPs will take about 100 seconds (one sample per second).
+            - Based on prior exprience, a file with 100 samples and 200,000 SNPs will take about 150 seconds (**one sample every 1.5 seconds**).
             - Smaller sample size and SNPs dataset will take less time.  
 
             **4. The results will be displayed as a table, showing the GBC of each breed for each individual.**
@@ -110,7 +112,7 @@ def upload_gt():
     if st.button('Analyze'):
         if uploaded_file is not None:
             try:
-                gt = pd.read_table(uploaded_file, sep=' ', header=0, index_col='CHR:POS')
+                gt = pd.read_table(uploaded_file, sep='\s+', header=0, index_col='CHR:POS')
                 st.session_state['gt'] = gt
                 result = GBC_estimator(st.session_state['gt'], confidence)
                 st.subheader('Analysis Results')
