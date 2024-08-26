@@ -34,7 +34,7 @@ st.markdown("""
             - The file should be in the format of a **space or tab-separated** text file.
             - More accurate results depend on more SNPs. We recommend using a file with **at least 1000 SNPs**, and **50,000 SNPs** above are highly recommended.
             - If you don't have a genotype file now or want to see the details of the file format, 
-            you can download the example file [here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotype_examples_for_GBC_extimator.txt).
+            you can download the example file [here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_GBC_extimator.txt).
             
             **2. Set the confidence threshold to filter out minor contributions.**
             - The minor contributions will be filtered out based on the confidence threshold you set. 
@@ -50,7 +50,7 @@ st.markdown("""
 
             **4. The results will be displayed as a table, showing the GBC of each breed for each individual.**
             - You can save the results as a CSV file by click the download button in the upper right corner.
-            
+            - A demo result file can be downloaded [here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/GBC_results.csv).            
             ## Analysis
             Please upload a genotype file to begin the analysis.""")
 
