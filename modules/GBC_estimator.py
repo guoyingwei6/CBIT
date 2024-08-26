@@ -53,7 +53,7 @@ def GBC_estimator(genotypes, confidence=0.05):
     return individual_contributions_rounded
 
 if __name__ == '__main__':
-    '''python3 GBC_estimator.py attachments/genotypes.txt 0.05
+    '''python3 GBC_estimator.py attachments/genotypes_for_GBC_extimator.txt 0.05
     The first argument is the genotype file, and the second argument is the confidence level.
     You can find the results in the attachments folder named gbc_results.csv.'''
     genotype_file = sys.argv[1] # 命令行第一个参数是基因型文件

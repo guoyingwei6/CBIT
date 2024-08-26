@@ -24,7 +24,7 @@ def breed_classifier(genotype_array):
     return breed_prediction
 
 if __name__ == '__main__':
-    '''python3 Breed_identifier.py attachments/genotypes.txt
+    '''python3 Breed_identifier.py attachments/genotypes_for_Breed_identifier.txt
     The argument is the genotype file.
     You can find the results in the attachments folder named breed_results.csv.'''
     genotype_file = sys.argv[1] # 命令行第一个参数是基因型文件
