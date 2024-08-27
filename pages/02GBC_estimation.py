@@ -20,7 +20,7 @@ st.info("""
             where $y$ is the genotype vector ($M \\times 1$) of all $M$ SNPs of the individual to be estimated,
             and the SNP genotypes are represented by $0$ (AA), $1$ (AB), and $2$ (BB) respectively. 
             $F$ is the allele frequency matrix with $M \\times T$, 
-            where $T$ is the number of breeds in the reference popution.
+            where $T$ is the number of breeds in the reference population.
             The regression coefficient vector $b$ ($T \\times 1$) is the GBC of each breed to the individual to be estimated.
             $e$ is the error term.  
             
