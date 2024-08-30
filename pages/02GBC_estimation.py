@@ -33,8 +33,8 @@ st.info("""
 st.warning("""
             ## Usuage
             **1. Upload the genotype file.**
-            - A genotype file is needed with **one individual per column and one SNP per line with header and index**. 
-            The first column should be the SNP ID (CHR:POS) and the first row should be the sample ID.            
+            - A genotype file (**recoded by 0, 1 and 2**) is needed with **one individual per column and one SNP per line with header and index**. 
+            The first column should be the SNP ID (CHR:POS) based on **ARS-UCD2.0** and the first row should be the sample ID.            
             - The file should be in the format of a **space or tab-separated** text file.
             - More accurate results depend on more SNPs. We recommend using a file with **at least 1000 SNPs**, and **50,000 SNPs** above are highly recommended.
             - If you don't have a genotype file now or want to see the details of the file format, 
@@ -53,13 +53,14 @@ st.warning("""
             - Smaller sample size and SNPs dataset will take less time.  
 
             **4. The results will be displayed as a table, showing the GBC of each breed for each individual.**
+            - Only breeds in our reference population can be estimated and displayed, details can be found in sample info table of the home page.
             - You can save the results as a CSV file by click the download button in the upper right corner.
             - A demo result file can be downloaded **[here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/GBC_results.csv)**. 
         """)
 
 st.success("""
             ## Analysis
-            **Please upload a genotype file to begin the analysis:**""")
+            """)
 
 @st.cache_data(ttl=3600)
 def load_AF():
@@ -113,8 +114,8 @@ def GBC_estimator(genotypes, confidence=0.05):
 
 def upload_gt():
     """从文件中读取基因型数据"""
-    uploaded_file = st.file_uploader("Choose a file")
-    confidence = st.number_input('Set the confidence threshold', min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.02f")
+    uploaded_file = st.file_uploader("Step1: Upload your genotype file")
+    confidence = st.number_input('Step2: Set the confidence threshold', min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.02f")
     st.caption("Adjust the confidence threshold to filter out minor contributions. Values should be between 0 and 1.")
 
     if st.button('Analyze'):
