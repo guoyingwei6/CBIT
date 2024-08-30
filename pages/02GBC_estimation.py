@@ -33,10 +33,11 @@ st.info("""
 st.warning("""
             ## Usuage
             **1. Upload the genotype file.**
-            - A genotype file (**recoded by 0, 1 and 2**) is needed with **one individual per column and one SNP per line with header and index**. 
+            - A genotype file (**recoded by 0, 1 and 2**) is needed with **one individual per column** as index and **one SNP per line** as header. 
             The first column should be the SNP ID (CHR:POS) based on **ARS-UCD2.0** and the first row should be the sample ID.            
             - The file should be in the format of a **space or tab-separated** text file.
             - More accurate results depend on more SNPs. We recommend using a file with **at least 1000 SNPs**, and **50,000 SNPs** above are highly recommended.
+
             - If you don't have a genotype file now or want to see the details of the file format, 
             you can download the example file **[here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_GBC_extimator.txt)**.
             

@@ -61,15 +61,25 @@ def page_frame():
     st.warning('''
             ## Usage
 
-            **1. Upload the genotype file.**
-            - A genotype file is needed with one individual per column and one SNP per line with header and index.
+            **1. Preparing the genotype file.**
+            - A genotype file is needed with one individual per line and one SNP per column.
+            - The first column should be the sample name, which is used as index and displayed in the results.
             - The file should be in the format of a space or tab-separated text file.
             - If you don't have a genotype file now or want to see the details of the file format,
-            you can download the example file [here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_breed_identifier.txt).
+            you can download the example file [here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/attachments/genotypes_for_Breed_identifier.txt).
 
-            **2. Click the 'Analyze' button to identify the breed.**
-
-                ''')
+            **2. Uploading the genotype file.**
+            - Click the 'Choose a file' button on the page.
+            - In the file selector dialog that appears, locate and select your genotype file.
+            
+            **3. Select the model to use for analysis.**
+            - There are two models available: 'fast' and 'accurate'.
+            - The 'fast' model uses 500 SNPs, while the 'accurate' model uses 2000 SNPs.
+            - The 'fast' model is recommended for quick analysis, while the 'accurate' model provides more accurate results.
+               
+            **4. Click the 'Analyze' button to identify the breed.**
+            - You can use the demo file mentioned above to test the tool and see the output format.
+            ''')
     st.success('''## Analysis''')
 
  
@@ -78,8 +88,10 @@ def page_frame():
     if uploaded_file is not None:
         try:
             gt_df = pd.read_csv(uploaded_file, sep='\s+', header=None)
-            gt_array = gt_df.to_numpy()
+            sample_names = gt_df.iloc[:, 0]  # 提取样本名
+            gt_array = gt_df.iloc[:, 1:].to_numpy()  # 提取基因型数据
             st.session_state.gt_array = gt_array
+            st.session_state.sample_names = sample_names.tolist()  # Store sample names as a list
             st.session_state.uploaded_file_name = uploaded_file.name
             st.session_state.model_choice = model_choice
             st.info('Genotype file has been uploaded.')
@@ -89,9 +101,12 @@ def page_frame():
     if st.button('Analyze'):
         if 'gt_array' in st.session_state and 'model_choice' in st.session_state:
             result = breed_classifier(st.session_state.gt_array, model=st.session_state.model_choice)
-            st.session_state.result = result  # Saving the result to session state
+            # 样本名和预测结果合并
+            combined_results = list(zip(st.session_state.sample_names, result))
+            st.session_state.result = combined_results
             st.subheader('Analysis Results')
-            st.write(result)
+            for sample, breed in combined_results:
+                st.write(f"{sample}: {breed}")
         else:
             st.error("No genotype data to analyze. Please upload a file and select a model.")
 
