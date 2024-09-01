@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import joblib
-from sklearn.svm import SVC
+from sklearn.impute import SimpleImputer
 from modules.common import show_footer, load_css
 
 
@@ -62,23 +62,31 @@ def page_frame():
             ## Usage
 
             **1. Preparing the genotype file.**
-            - A genotype file is needed with one individual per line and one SNP per column.
-            - The first column should be the sample name, which is used as index and displayed in the results.
-            - The file should be in the format of a space or tab-separated text file.
+            - The genotype file must contain and only contain the SNPs we specify. 
+            The locations of them based on **ARS-UCD2.0** are available here 
+            for **[fast model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/svc_500.map)**
+            and **[accurate model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/svc_2000.map)**. 
+            - Recoded by **0, 1, and 2**, representing the genotypes AA, AB, and BB, respectively.
+            - **One individual per line** and **one SNP per column**.
+            - The **first column** should be the **sample name**, which is used as index and displayed in the results.
+            - **Space or tab-separated** text file.
+            - **Missing values (NA)** do not affect the analysis, but affect the accuracy. 
+               We still highly recommend performing **imputation** with BEAGLE before analysis if your data contains missing values.
             - If you don't have a genotype file now or want to see the details of the file format,
-            you can download the example file [here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/attachments/genotypes_for_Breed_identifier.txt).
+            you can download the example file here 
+            for **[fast model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_Breed_identifier500.txt)**
+            and **[accurate model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_Breed_identifier2000.txt)**.
 
             **2. Uploading the genotype file.**
-            - Click the 'Choose a file' button on the page.
-            - In the file selector dialog that appears, locate and select your genotype file.
-            
+            - Click the 'Choose a file' button on the page and select your genotype file.
+
             **3. Select the model to use for analysis.**
-            - There are two models available: 'fast' and 'accurate'.
+            - There are two models available: '**fast**' and '**accurate**'.
             - The 'fast' model uses 500 SNPs, while the 'accurate' model uses 2000 SNPs.
             - The 'fast' model is recommended for quick analysis, while the 'accurate' model provides more accurate results.
                
-            **4. Click the 'Analyze' button to identify the breed.**
-            - You can use the demo file mentioned above to test the tool and see the output format.
+            **4. Click the 'Analyze' button to predict the breed.**
+            - You can use the demo file mentioned above to test the tool and see the output details.
             ''')
     st.success('''## Analysis''')
 
@@ -90,7 +98,11 @@ def page_frame():
             gt_df = pd.read_csv(uploaded_file, sep='\s+', header=None)
             sample_names = gt_df.iloc[:, 0]  # 提取样本名
             gt_array = gt_df.iloc[:, 1:].to_numpy()  # 提取基因型数据
-            st.session_state.gt_array = gt_array
+            # 创建 SimpleImputer 对象，强制将缺失值填充为 0
+            imputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_value=0)
+            # 使用 fit_transform 方法填充缺失值
+            gt_array_imputed = imputer.fit_transform(gt_array)
+            st.session_state.gt_array = gt_array_imputed
             st.session_state.sample_names = sample_names.tolist()  # Store sample names as a list
             st.session_state.uploaded_file_name = uploaded_file.name
             st.session_state.model_choice = model_choice
@@ -99,7 +111,7 @@ def page_frame():
             st.error(f'Invalid file. Please upload a valid genotype file. Error: {e}')
     
     if st.button('Analyze'):
-        if 'gt_array' in st.session_state and 'model_choice' in st.session_state:
+        if 'gt_array_imputed' in st.session_state and 'model_choice' in st.session_state:
             result = breed_classifier(st.session_state.gt_array, model=st.session_state.model_choice)
             # 样本名和预测结果合并
             combined_results = list(zip(st.session_state.sample_names, result))
