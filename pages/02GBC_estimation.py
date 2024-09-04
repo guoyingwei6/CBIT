@@ -103,7 +103,7 @@ def GBC_estimator(genotypes, confidence=0.05):
         coefficients[coefficients < 0] = 0
         # 计算每个品种的遗传贡献比例
         contributions = coefficients / sum(coefficients)  
-        # 将contributions中小于0.02的系数转换为0
+        # 将contributions中小于cutoff的系数转换为0
         contributions[contributions < confidence] = 0
         # 再次计算每个品种的遗传贡献比例
         contributions = contributions / sum(contributions)
