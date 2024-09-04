@@ -6,41 +6,8 @@ from sklearn.impute import SimpleImputer
 from modules.common import show_footer, load_css
 
 
-###todo:
-### 1. st.tab开发两个版本的文件上传，一个是array，一个是plink格式
-### 2. 添加2000模型
-
 # 设置页面配置
 st.set_page_config(page_title="Breed Identification", page_icon="🐂", layout="centered", initial_sidebar_state="expanded")
-
-@st.cache_data(ttl=3600)
-def load_breed_codes():
-    """从文件中读取品种代码，传入字典中。"""
-    df = pd.read_csv('attachments/breed_code.csv')
-    code_breed_dict = pd.Series(df.Breed.values, index=df.Code).to_dict()
-    return code_breed_dict
-
-@st.cache_resource(ttl=3600)
-def load_model_fast():
-    """加载模型。"""
-    clf = joblib.load('attachments/SVC_500_best.pkl')
-    return clf
-
-def load_model_accurate():
-    """加载模型。"""
-    clf = joblib.load('attachments/SVC_2000_best.pkl')
-    return clf
-
-def breed_classifier(genotype_array, model='fast'):
-    """品种分类函数。"""
-    if model == 'fast':
-        clf = load_model_fast()
-    elif model == 'accurate':
-        clf = load_model_accurate()
-    prediction = clf.predict(genotype_array)
-    breed_code_dict = load_breed_codes()
-    breed_prediction = [breed_code_dict[code] for code in prediction]
-    return breed_prediction
 
 def page_frame():
     st.title('Breed Identifier')
@@ -64,8 +31,8 @@ def page_frame():
             **1. Preparing the genotype file.**
             - The genotype file must contain and only contain the SNPs we specify. 
             The locations of them based on **ARS-UCD2.0** are available here 
-            for **[fast model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/svc_500.map)**
-            and **[accurate model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/svc_2000.map)**. 
+            for **[fast model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/map_for_Breed_identifier_fast_model.txt)**
+            and **[accurate model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/map_for_Breed_identifier_accurate_model.txt)**. 
             - Recoded by **0, 1, and 2**, representing the genotypes AA, AB, and BB, respectively.
             - **One individual per line** and **one SNP per column**.
             - The **first column** should be the **sample name**, which is used as index and displayed in the results.
@@ -74,15 +41,15 @@ def page_frame():
                We still highly recommend performing **imputation** with BEAGLE before analysis if your data contains missing values.
             - If you don't have a genotype file now or want to see the details of the file format,
             you can download the example file here 
-            for **[fast model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_Breed_identifier500.txt)**
-            and **[accurate model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_Breed_identifier2000.txt)**.
+            for **[fast model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_Breed_identifier_fast_model.txt)**
+            and **[accurate model](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_Breed_identifier_accurate_model.txt)**.
 
             **2. Uploading the genotype file.**
             - Click the 'Choose a file' button on the page and select your genotype file.
 
             **3. Select the model to use for analysis.**
             - There are two models available: '**fast**' and '**accurate**'.
-            - The 'fast' model uses 500 SNPs, while the 'accurate' model uses 2000 SNPs.
+            - The 'fast' model uses 100 SNPs, while the 'accurate' model uses 1000 SNPs.
             - The 'fast' model is recommended for quick analysis, while the 'accurate' model provides more accurate results.
                
             **4. Click the 'Analyze' button to predict the breed.**
@@ -90,9 +57,41 @@ def page_frame():
             ''')
     st.success('''## Analysis''')
 
- 
+@st.cache_data(ttl=3600)
+def load_breed_codes():
+    """从文件中读取品种代码，传入字典中。"""
+    df = pd.read_csv('attachments/breed_code.csv')
+    code_breed_dict = pd.Series(df.Breed.values, index=df.Code).to_dict()
+    return code_breed_dict
+
+@st.cache_resource(ttl=3600)
+def load_model_fast():
+    """加载模型。"""
+    clf = joblib.load('attachments/Breed_identifier_fast_model.pkl')
+    return clf
+
+@st.cache_resource(ttl=3600)
+def load_model_accurate():
+    """加载模型。"""
+    clf = joblib.load('attachments/Breed_identifier_accurate_model.pkl')
+    return clf
+
+def breed_classifier(genotype_array, model='accurate'):
+    """品种分类函数。"""
+    if model == 'fast':
+        clf = load_model_fast()
+    elif model == 'accurate':
+        clf = load_model_accurate()
+    prediction = clf.predict(genotype_array)
+    breed_code_dict = load_breed_codes()
+    breed_prediction = [breed_code_dict[code] for code in prediction]
+    return breed_prediction
+
+
+
+def analysis():
     uploaded_file = st.file_uploader("Please upload a genotype file to begin analysis")
-    model_choice = st.selectbox('Choose the model to use for analysis:', ['fast', 'accurate'], index=0)  # 默认选择'fast'
+    model_choice = st.selectbox('Choose the model to use for analysis:', ['accurate', 'fast'], index=0)  # 默认选择'fast'
     if uploaded_file is not None:
         try:
             gt_df = pd.read_csv(uploaded_file, sep='\s+', header=None)
@@ -102,7 +101,7 @@ def page_frame():
             imputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_value=0)
             # 使用 fit_transform 方法填充缺失值
             gt_array_imputed = imputer.fit_transform(gt_array)
-            st.session_state.gt_array = gt_array_imputed
+            st.session_state.gt_array_imputed = gt_array_imputed
             st.session_state.sample_names = sample_names.tolist()  # Store sample names as a list
             st.session_state.uploaded_file_name = uploaded_file.name
             st.session_state.model_choice = model_choice
@@ -112,7 +111,7 @@ def page_frame():
     
     if st.button('Analyze'):
         if 'gt_array_imputed' in st.session_state and 'model_choice' in st.session_state:
-            result = breed_classifier(st.session_state.gt_array, model=st.session_state.model_choice)
+            result = breed_classifier(st.session_state.gt_array_imputed, model=st.session_state.model_choice)
             # 样本名和预测结果合并
             combined_results = list(zip(st.session_state.sample_names, result))
             st.session_state.result = combined_results
@@ -127,3 +126,4 @@ if __name__ == '__main__':
     load_css()
     page_frame()
     show_footer()
+    analysis()
