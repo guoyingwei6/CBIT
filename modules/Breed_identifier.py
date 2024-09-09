@@ -21,15 +21,17 @@ def load_model_accurate():
     return clf
 
 def breed_classifier(genotype_array, model='accurate'):
-    """品种分类函数。"""
+    """品种分类加预测概率函数。"""
     if model == 'fast':
         clf = load_model_fast()
     elif model == 'accurate':
         clf = load_model_accurate()
-    prediction = clf.predict(genotype_array)
+    predictions = clf.predict(genotype_array)
+    probs = clf.predict_proba(genotype_array)
+    max_probs = np.max(probs, axis=1)  # 获取最大概率
     breed_code_dict = load_breed_codes()
-    breed_prediction = [breed_code_dict[code] for code in prediction]
-    return breed_prediction
+    breed_predictions = [breed_code_dict[code] for code in predictions]
+    return list(zip(breed_predictions, max_probs))  # 返回标签和最大概率的元组列表
 
 
 
@@ -45,14 +47,10 @@ def analysis():
     imputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_value=0)
     # 使用 fit_transform 方法填充缺失值
     gt_array_imputed = imputer.fit_transform(gt_array)
-
-
-    result = breed_classifier(gt_array_imputed, model=model)
-    # 样本名和预测结果合并
-    combined_results = list(zip(sample_names, result))
-    for sample, breed in combined_results:
-        print(f"{sample}: {breed}")
-
+    results = breed_classifier(gt_array_imputed, model=model)
+    results_df = pd.DataFrame(results, columns=['Breed', 'Probability'])
+    results_df.insert(0, 'Sample', sample_names)  # 将样本名插入到结果DataFrame的第一列
+    print(results_df.to_string(index=False))  # 输出结果DataFrame，不显示索引
 
 if __name__ == '__main__':
     '''python3 modules/Breed_identifier.py attachments/genotypes_for_Breed_identifier_accurate_model.txt accurate'''

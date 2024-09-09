@@ -36,7 +36,7 @@ st.warning("""
             - A genotype file (**recoded by 0, 1 and 2**) is needed with **one individual per column** and **one SNP per line**. 
             The first column should be the SNP ID (CHR:POS) based on **ARS-UCD2.0** and the first row should be the sample ID.            
             - The file should be in the format of a **space or tab-separated** text file.
-            - More accurate results depend on more SNPs. We recommend using a file with **at least 1000 SNPs**, and **50,000 SNPs** above are highly recommended.
+            - More accurate results depend on more SNPs. We recommend using a file with **at least 1,000 SNPs**, and **50,000 SNPs** above are highly recommended.
             - **Missing values (NA)** do not affect the analysis, but the more missing values, the less accurate the results.
             So, we highly recommend performing **imputation** with BEAGLE before analysis if your data contains missing values.
             - If you don't have a genotype file now or want to see the details of the file format, 

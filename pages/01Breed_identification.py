@@ -20,7 +20,7 @@ def page_frame():
             we found the workflow using RF as feature selector and SVM as classifier has the best performance.
             For more detailed information on the accuracy of different models and factors influencing the accuracy, please refer to our paper.  
             
-            Here, we provide the classification models with 500 and 2000 SNPs, respectively. 
+            Here, we provide the classification models with 100 and 1,000 SNPs, respectively. 
             You can choose the model according to your data and expectations.
 
             ''')
@@ -49,11 +49,13 @@ def page_frame():
 
             **3. Select the model to use for analysis.**
             - There are two models available: '**fast**' and '**accurate**'.
-            - The 'fast' model uses 100 SNPs, while the 'accurate' model uses 1000 SNPs.
+            - The 'fast' model uses 100 SNPs, while the 'accurate' model uses 1,000 SNPs.
             - The 'fast' model is recommended for quick analysis, while the 'accurate' model provides more accurate results.
                
             **4. Click the 'Analyze' button to predict the breed.**
-            - You can use the demo file mentioned above to test the tool and see the output details.
+            - You can see the predicted breed and the probability of the prediction for each individual in the results table.  
+            - If the probability is **below 0.4**, the prediction may be less reliable, suggesting that the individual could be a mixed breed. 
+               In this case, you can consider using the **GBC estimator tool** to estimate the genomic breed content of the individual.
             ''')
     st.success('''## Analysis''')
 
@@ -76,22 +78,36 @@ def load_model_accurate():
     clf = joblib.load('attachments/Breed_identifier_accurate_model.pkl')
     return clf
 
+#之前用于预测品种的函数，无法预测概率，更换了可以预测概率的模型
+#def breed_classifier(genotype_array, model='accurate'):
+#    """品种分类函数。"""
+#    if model == 'fast':
+#        clf = load_model_fast()
+#    elif model == 'accurate':
+#        clf = load_model_accurate()
+#    prediction = clf.predict(genotype_array)
+#    breed_code_dict = load_breed_codes()
+#    breed_prediction = [breed_code_dict[code] for code in prediction]
+#    return breed_prediction
+
 def breed_classifier(genotype_array, model='accurate'):
-    """品种分类函数。"""
+    """品种分类加预测概率函数。"""
     if model == 'fast':
         clf = load_model_fast()
     elif model == 'accurate':
         clf = load_model_accurate()
-    prediction = clf.predict(genotype_array)
+    predictions = clf.predict(genotype_array)
+    probs = clf.predict_proba(genotype_array)
+    max_probs = np.max(probs, axis=1)  # 获取最大概率
     breed_code_dict = load_breed_codes()
-    breed_prediction = [breed_code_dict[code] for code in prediction]
-    return breed_prediction
+    breed_predictions = [breed_code_dict[code] for code in predictions]
+    return list(zip(breed_predictions, max_probs))  # 返回标签和最大概率的元组列表
 
 
 
 def analysis():
     uploaded_file = st.file_uploader("Please upload a genotype file to begin analysis")
-    model_choice = st.selectbox('Choose the model to use for analysis:', ['accurate', 'fast'], index=0)  # 默认选择'fast'
+    model_choice = st.selectbox('Choose the model to use for analysis:', ['accurate', 'fast'], index=0)  # 默认选择'accurate'
     if uploaded_file is not None:
         try:
             gt_df = pd.read_csv(uploaded_file, sep='\s+', header=None)
@@ -111,13 +127,12 @@ def analysis():
     
     if st.button('Analyze'):
         if 'gt_array_imputed' in st.session_state and 'model_choice' in st.session_state:
-            result = breed_classifier(st.session_state.gt_array_imputed, model=st.session_state.model_choice)
-            # 样本名和预测结果合并
-            combined_results = list(zip(st.session_state.sample_names, result))
-            st.session_state.result = combined_results
+            results = breed_classifier(st.session_state.gt_array_imputed, model=st.session_state.model_choice)
+            results_df = pd.DataFrame(results, columns=['Breed', 'Probability'])
+            results_df.insert(0, 'Sample', sample_names)  # 将样本名插入到结果DataFrame的第一列
+            st.session_state.results_df = results_df
             st.subheader('Analysis Results')
-            for sample, breed in combined_results:
-                st.write(f"{sample}: {breed}")
+            st.table(st.session_state.results_df)
         else:
             st.error("No genotype data to analyze. Please upload a file and select a model.")
 
