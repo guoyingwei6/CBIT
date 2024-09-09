@@ -130,6 +130,7 @@ def analysis():
             results = breed_classifier(st.session_state.gt_array_imputed, model=st.session_state.model_choice)
             results_df = pd.DataFrame(results, columns=['Breed', 'Probability'])
             results_df.insert(0, 'Sample', sample_names)  # 将样本名插入到结果DataFrame的第一列
+            results_df.index = np.arange(1, len(results_df) + 1)  # 重新索引
             st.session_state.results_df = results_df
             st.subheader('Analysis Results')
             st.table(st.session_state.results_df)
