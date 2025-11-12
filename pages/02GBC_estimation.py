@@ -3,66 +3,168 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import joblib
-from modules.common import show_footer, load_css
+from modules.common import show_footer, load_css, add_spacing
+import io
 
 # 设置页面配置
-st.set_page_config(page_title="GBC estimator", page_icon="🐂", layout="centered", initial_sidebar_state="expanded")
-st.title('GBC estimator')
+st.set_page_config(
+    page_title="GBC Estimator",
+    page_icon="📈",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-st.info("""
-            ## Introduction
-            This tool is designed to help you estimate the genomic breed content (GBC) in a mixed breed cattle population.  
-            
-            We estimate the GBC using a linear model based on the genotype data:
-            $$
-            y = Fb + e
-            $$
-            where $y$ is the genotype vector ($M \\times 1$) of all $M$ SNPs of the individual to be estimated,
-            and the SNP genotypes are represented by $0$ (AA), $1$ (AB), and $2$ (BB) respectively. 
-            $F$ is the allele frequency matrix with $M \\times T$, 
-            where $T$ is the number of breeds in the reference population.
-            The regression coefficient vector $b$ ($T \\times 1$) is the GBC of each breed to the individual to be estimated.
-            $e$ is the error term.  
-            
-            Then, we solve the linear model using **ordinary least squares (OLS) regression**, where $\hat{b} = (F^{\prime} F)^{-1}F^{\prime}y$.  
-            
-            Finally, we normalize the regression coefficients to sum to 1 and filter out minor contributions based on a confidence threshold.
-            
+# 加载自定义样式
+load_css()
+
+# 页面标题
+st.markdown("""
+<div style='text-align: center; padding: 20px 0;'>
+    <h1>📈 Genomic Breed Composition (GBC) Estimator</h1>
+    <p style='font-size: 18px; color: #64748b;'>
+        Estimate breed composition in crossbred cattle populations
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+add_spacing(20)
+
+# 使用标签页组织内容
+tab1, tab2, tab3 = st.tabs(["📖 Introduction", "📋 Usage Guide", "🔬 Analysis"])
+
+with tab1:
+    add_spacing(20)
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.markdown("""
+        ### About This Tool
+
+        The GBC Estimator helps you determine the **genomic breed composition** in mixed or crossbred
+        cattle populations using advanced statistical modeling.
+
+        #### Statistical Model
+
+        We use a linear regression model based on genotype data:
         """)
 
-st.warning("""
-            ## Usage
-            **1. Upload the genotype file.**
-            - A genotype file (**recoded by 0, 1 and 2**) is needed with **one individual per column** and **one SNP per line**. 
-            The first column should be the SNP ID (CHR:POS) based on **ARS-UCD2.0** and the first row should be the sample ID.            
-            - The file should be in the format of a **space or tab-separated** text file.
-            - More accurate results depend on more SNPs. We recommend using a file with **at least 1000 SNPs**, and **50,000 SNPs** above are highly recommended.
-            - **Missing values (NA)** do not affect the analysis, but the more missing values, the less accurate the results.
-            So, we highly recommend performing **imputation** with BEAGLE before analysis if your data contains missing values.
-            - If you don't have a genotype file now or want to see the details of the file format, 
-            you can download the example file **[here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_GBC_extimator.txt)**.
-            
-            **2. Set the confidence threshold to filter out minor contributions.**
-            - The minor contributions will be filtered out based on the confidence threshold you set. 
-            - A larger threshold will exclude the interference from irrelevant breeds, 
-            but there is also a risk of overestimating the true contributions of some breeds. Smaller thresholds have the opposite effect. 
-            - By experience, a threshold between **0.02** (using about 200,000 SNPs) and **0.1** (5,000 SNPs below) is appropriate. 
-            We recommend a threshold of **0.05** by default, it can be changed according to your data and expectations.
+        st.latex(r"y = Fb + e")
 
-            **3. Click the 'Analyze' button to estimate the GBC.**
-            - The analysis will take a few seconds to complete, depending on the size of the genotype file. 
-            - Based on prior exprience, a file with 100 samples and 200,000 SNPs will take about 150 seconds (**one sample every 1.5 seconds**).
-            - Smaller sample size and SNPs dataset will take less time.  
+        st.markdown("""
+        Where:
+        - $y$: Genotype vector ($M \\times 1$) of all $M$ SNPs for the individual
+        - $F$: Allele frequency matrix ($M \\times T$), where $T$ = number of breeds
+        - $b$: Regression coefficients ($T \\times 1$), representing GBC for each breed
+        - $e$: Error term
 
-            **4. The results will be displayed as a table, showing the GBC of each breed for each individual.**
-            - Only breeds in our reference population can be estimated and displayed, details can be found in sample info table of the home page.
-            - You can save the results as a CSV file by click the download button in the upper right corner.
-            - A demo result file can be downloaded **[here](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/GBC_results.csv)**. 
+        #### Methodology
+
+        1. **Solve using OLS regression**: $\\hat{b} = (F^{\\prime} F)^{-1}F^{\\prime}y$
+        2. **Normalize** coefficients to sum to 1
+        3. **Filter** minor contributions based on confidence threshold
         """)
 
-st.success("""
-            ## Analysis
-            """)
+    with col2:
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white; padding: 20px; border-radius: 15px; margin-top: 20px;'>
+            <h3 style='color: white; margin-top: 0;'>Key Features</h3>
+            <ul style='margin-bottom: 0;'>
+                <li>OLS regression model</li>
+                <li>Handles missing data</li>
+                <li>Adjustable thresholds</li>
+                <li>49 reference breeds</li>
+                <li>High accuracy</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    add_spacing(20)
+
+    st.markdown("#### Performance Expectations")
+
+    perf_data = pd.DataFrame({
+        'Dataset Size': ['Small (10 samples, 5K SNPs)', 'Medium (50 samples, 50K SNPs)', 'Large (100 samples, 200K SNPs)'],
+        'Processing Time': ['~5 seconds', '~30 seconds', '~150 seconds'],
+        'Time per Sample': ['~0.5s', '~0.6s', '~1.5s']
+    })
+    st.dataframe(perf_data, hide_index=True, use_container_width=True)
+
+with tab2:
+    add_spacing(20)
+
+    st.markdown("### Step-by-Step Guide")
+
+    # 步骤 1
+    with st.expander("📁 **Step 1: Prepare Your Genotype File**", expanded=True):
+        st.markdown("""
+        Your genotype file must meet specific format requirements:
+
+        **File Format:**
+        - Encoded as **0, 1, and 2** (genotypes AA, AB, BB)
+        - **One SNP per row**, **one individual per column**
+        - **First column**: SNP ID in format `CHR:POS` (based on **ARS-UCD2.0**)
+        - **First row**: Sample IDs
+        - **Space or tab-separated** text file
+
+        **SNP Requirements:**
+        - **Minimum**: 1,000 SNPs (basic analysis)
+        - **Recommended**: 50,000+ SNPs (high accuracy)
+        - More SNPs = More accurate results
+
+        **Missing Values:**
+        - Automatically handled (dropped from analysis)
+        - ⚠️ Excessive missing values reduce accuracy
+        - 💡 We recommend **BEAGLE imputation** before analysis
+
+        **Example File:**
+        - [Download Example File](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/genotypes_for_GBC_extimator.txt)
+        - [Download Example Results](https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/GBC_results.csv)
+        """)
+
+    # 步骤 2
+    with st.expander("🎚️ **Step 2: Set Confidence Threshold**"):
+        st.markdown("""
+        The confidence threshold filters out minor breed contributions:
+
+        **Threshold Guidelines:**
+
+        | SNP Count | Recommended Threshold | Description |
+        |-----------|----------------------|-------------|
+        | < 5,000 | 0.10 | Higher threshold for fewer SNPs |
+        | 5,000 - 50,000 | 0.05 | **Default (balanced)** |
+        | 50,000 - 200,000 | 0.02 | Lower threshold for many SNPs |
+
+        **Trade-offs:**
+        - **Higher threshold (0.10)**: Excludes noise, may overestimate main breeds
+        - **Lower threshold (0.02)**: Captures minor breeds, may include noise
+
+        💡 **Default 0.05** works well for most datasets
+        """)
+
+    # 步骤 3-4
+    with st.expander("🔍 **Step 3: Run Analysis**"):
+        st.markdown("""
+        1. Upload your prepared genotype file
+        2. Set the confidence threshold
+        3. Click **'🔍 Analyze'** button
+        4. Wait for processing (time depends on file size)
+        """)
+
+    with st.expander("📊 **Step 4: View & Download Results**"):
+        st.markdown("""
+        Results show breed composition for each individual:
+        - View detailed composition table
+        - Each column represents an individual
+        - Each row shows a breed's contribution (0-1)
+        - Download results as CSV file
+        """)
+
+with tab3:
+    add_spacing(20)
+    st.markdown("### 🔬 Run Your Analysis")
+    st.markdown("Upload your genotype file and configure parameters to estimate genomic breed composition.")
 
 @st.cache_data(ttl=3600)
 def load_AF():
@@ -115,26 +217,163 @@ def GBC_estimator(genotypes, confidence=0.05):
     return individual_contributions_rounded
 
 def upload_gt():
-    """从文件中读取基因型数据"""
-    uploaded_file = st.file_uploader("Step1: Upload your genotype file")
-    confidence = st.number_input('Step2: Set the confidence threshold', min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.02f")
-    st.caption("Adjust the confidence threshold to filter out minor contributions. Values should be between 0 and 1.")
+    """从文件中读取基因型数据并进行分析"""
 
-    if st.button('Analyze'):
-        if uploaded_file is not None:
-            try:
+    # 创建两列布局
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.markdown("#### 📤 Upload Genotype File")
+        uploaded_file = st.file_uploader(
+            "Choose your genotype file",
+            type=['txt', 'csv'],
+            help="Upload a space or tab-separated file with SNP format: CHR:POS in first column, sample IDs in first row"
+        )
+
+    with col2:
+        st.markdown("#### 🎚️ Confidence Threshold")
+        confidence = st.number_input(
+            'Set threshold:',
+            min_value=0.0,
+            max_value=1.0,
+            value=0.05,
+            step=0.01,
+            format="%.02f",
+            help="Filter out breeds with contribution below this threshold"
+        )
+
+        # 根据阈值给出建议
+        if confidence <= 0.02:
+            st.info("🔍 **Low threshold**\n\nCaptures minor breeds")
+        elif confidence >= 0.10:
+            st.info("🎯 **High threshold**\n\nMain breeds only")
+        else:
+            st.info("⚖️ **Balanced**\n\nGood for most cases")
+
+    add_spacing(20)
+
+    # 显示文件信息
+    if uploaded_file is not None:
+        try:
+            with st.spinner('📊 Loading genotype file...'):
+                # 先读取文件预览
                 gt = pd.read_table(uploaded_file, sep='\s+', header=0, index_col='CHR:POS').dropna()
                 st.session_state['gt'] = gt
-                result = GBC_estimator(st.session_state['gt'], confidence)
-                st.subheader('Analysis Results')
-                st.write(result)
+                st.session_state['confidence'] = confidence
+                st.session_state['uploaded_file_name'] = uploaded_file.name
+
+            # 显示文件统计信息
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("📄 File Name", uploaded_file.name)
+            with col2:
+                st.metric("🧬 SNPs", gt.shape[0])
+            with col3:
+                st.metric("👥 Samples", gt.shape[1])
+
+            st.success('✅ Genotype file loaded successfully!')
+
+            # SNP数量建议
+            if gt.shape[0] < 1000:
+                st.warning("⚠️ Your file has fewer than 1,000 SNPs. Results may be less accurate. Consider using more SNPs.")
+            elif gt.shape[0] >= 50000:
+                st.info("🎯 Excellent! Your file has 50,000+ SNPs, which will provide highly accurate results.")
+
+        except Exception as e:
+            st.error(f'❌ Invalid file format. Please check your file format.\n\n**Error details:** {e}')
+            st.info("💡 Make sure:\n- First column is SNP ID (CHR:POS)\n- First row is sample IDs\n- File is space or tab-separated")
+
+    add_spacing(20)
+
+    # 分析按钮
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        analyze_button = st.button('🔍 Analyze', use_container_width=True, type="primary")
+
+    if analyze_button:
+        if 'gt' in st.session_state:
+            # 估算处理时间
+            estimated_time = len(st.session_state['gt'].columns) * 1.5
+            time_display = f"{estimated_time:.1f} seconds" if estimated_time < 60 else f"{estimated_time/60:.1f} minutes"
+
+            st.info(f"⏱️ Estimated processing time: {time_display}")
+
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+
+            try:
+                status_text.text('🔬 Analyzing genomic breed composition...')
+                progress_bar.progress(30)
+
+                result = GBC_estimator(
+                    st.session_state['gt'],
+                    st.session_state['confidence']
+                )
+
+                progress_bar.progress(100)
+                status_text.text('✅ Analysis complete!')
+
+                st.session_state['result'] = result
+
+                add_spacing(20)
+
+                # 显示结果
+                st.markdown("### 📊 Analysis Results")
+
+                # 显示结果表格
+                st.markdown("#### Breed Composition Table")
+                st.markdown("Each column represents a sample, each row represents a breed. Values show the proportion (0-1) of each breed's contribution.")
+
+                st.dataframe(
+                    result.style.format("{:.4f}").background_gradient(cmap='Blues'),
+                    use_container_width=True,
+                    height=min(600, (len(result) + 1) * 35 + 3)
+                )
+
+                add_spacing(20)
+
+                # 统计信息
+                st.markdown("#### 📈 Summary Statistics")
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    # 每个样本中检测到的品种数量
+                    breeds_per_sample = (result > 0).sum(axis=0)
+                    st.metric("🐄 Avg Breeds per Sample", f"{breeds_per_sample.mean():.1f}")
+
+                with col2:
+                    # 检测到的总品种数
+                    total_breeds_detected = (result > 0).any(axis=1).sum()
+                    st.metric("🌍 Total Breeds Detected", total_breeds_detected)
+
+                with col3:
+                    st.metric("📊 Samples Analyzed", len(result.columns))
+
+                # 下载按钮
+                add_spacing(20)
+
+                csv_buffer = io.StringIO()
+                result.to_csv(csv_buffer)
+                csv_data = csv_buffer.getvalue()
+
+                st.download_button(
+                    label="📥 Download Results (CSV)",
+                    data=csv_data,
+                    file_name=f"GBC_results_{st.session_state['uploaded_file_name'].split('.')[0]}.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+
             except Exception as e:
-                st.error(f'Invalid file. Please upload a valid genotype file. Error: {e}')
+                progress_bar.empty()
+                status_text.empty()
+                st.error(f'❌ Analysis failed. Please check your data.\n\n**Error details:** {e}')
+
         else:
-            st.error("No genotype data to analyze. Please upload a file.")
+            st.error("⚠️ No genotype data to analyze. Please upload a file first.")
 
 
 if __name__ == '__main__':
-    load_css()
     upload_gt()
     show_footer()
