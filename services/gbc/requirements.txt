@@ -1,0 +1,4 @@
+boto3==1.38.46
+fastapi==0.115.12
+numpy==1.26.4
+uvicorn==0.34.3

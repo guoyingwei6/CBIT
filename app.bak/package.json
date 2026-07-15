@@ -1,0 +1,26 @@
+{
+  "name": "cbit-serverless",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:gbc-kernel": "asc assembly/gbc-kernel.ts --outFile public/gbc/gbc-kernel.wasm --optimize --runtime stub --enable simd --noAssert",
+    "prepare:runtime-assets": "node scripts/copy-ort-assets.js",
+    "preserve": "npm run prepare:runtime-assets && npm run build:gbc-kernel",
+    "prebuild": "npm run prepare:runtime-assets && npm run build:gbc-kernel",
+    "build": "node scripts/build-static.mjs",
+    "serve": "node scripts/serve-static.mjs --root public --port 8080",
+    "test:breed-models": "node scripts/verify-breed-models.js",
+    "test:breed-ui": "node scripts/verify-breed-ui.mjs",
+    "test:gbc-browser": "node scripts/verify-gbc-browser.mjs",
+    "test:gbc-browsers": "node scripts/run-gbc-browser-matrix.mjs",
+    "test:gbc-ui": "node scripts/verify-gbc-ui.mjs",
+    "test:home-ui": "node scripts/verify-home-ui.mjs",
+    "test:responsive-ui": "node scripts/verify-responsive-ui.mjs",
+    "serve:gbc-benchmark": "node scripts/serve-gbc-browser-benchmark.mjs"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.28.9",
+    "onnxruntime-web": "1.27.0",
+    "selenium-webdriver": "^4.46.0"
+  }
+}

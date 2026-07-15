@@ -1,0 +1,11 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.env
+.env.*
+*.log
+.idea/
+.vscode/
+app.bak/node_modules/
+app.bak/dist/
+app.bak/public/ort/

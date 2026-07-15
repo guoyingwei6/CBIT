@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Cattle Breed Identification Tool">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/app.css">
+    <title>CBIT</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#/home" data-route-link="/home">Home</a>
+        <a href="#/Breed_identification" data-route-link="/Breed_identification">Breed identification</a>
+        <a href="#/GBC_estimation" data-route-link="/GBC_estimation">GBC estimation</a>
+        <a href="#/About" data-route-link="/About">About</a>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="page" data-route="/home">
+        <h1 class="brand-title">
+          <span class="brand-c">C</span>attle
+          <span class="brand-b">B</span>reed
+          <span class="brand-i">I</span>dentification
+          <span class="brand-t">T</span>ool
+          <span>(CBIT)</span>
+        </h1>
+
+        <div class="home-intro">
+          <div class="home-copy">
+            <p>
+              Cattle is an important livestock that provides meat, milk, and other
+              products to humans. Identifying cattle breeds is essential for
+              breeding, management, and conservation.
+            </p>
+            <p>
+              Here, we provide <strong>CBIT</strong> to help you identify different cattle
+              breeds and the genomic breed content based on genotypic data. For
+              more information on <strong>breed identification</strong> and
+              <strong>GBC analysis</strong> functions, please refer to the usage
+              instructions of each tool.
+            </p>
+            <p>
+              There is a total of <strong>2913 samples</strong> in our dataset, including
+              <strong>49 breeds</strong> from Asia and Europe. The details of the sample
+              information are as follows.
+            </p>
+          </div>
+          <div class="carousel" aria-label="Cattle breed photographs">
+            <img id="breed-photo" alt="Cattle breed">
+            <button class="carousel-control previous" type="button" aria-label="Previous image">&#8249;</button>
+            <button class="carousel-control next" type="button" aria-label="Next image">&#8250;</button>
+          </div>
+        </div>
+
+        <div class="tabs home-tabs" data-tabs="home">
+          <div class="tab-list" role="tablist" aria-label="Sample information views">
+            <button class="home-tab map-tab" role="tab" type="button" data-tab="map" aria-selected="true">Sample sites</button>
+            <button class="home-tab pca-tab" role="tab" type="button" data-tab="pca" aria-selected="false">PCA of all samples</button>
+            <button class="home-tab table-tab" role="tab" type="button" data-tab="samples" aria-selected="false">Sample info table</button>
+          </div>
+
+          <div class="tab-panel map" role="tabpanel" data-panel="map">
+            <div id="canvas" aria-label="Map of sample sites"></div>
+          </div>
+
+          <div class="tab-panel poa" role="tabpanel" data-panel="pca" hidden>
+            <iframe title="PCA of all samples" data-src="/pca.html"></iframe>
+          </div>
+
+          <div class="tab-panel table" role="tabpanel" data-panel="samples" hidden>
+            <div class="table-tools">
+              <a href="/data/sample_info.csv" target="_blank" rel="noopener noreferrer">Download File</a>
+              <label class="filter-control">
+                <span>Filter with keyword:</span>
+                <input id="sample-filter" type="search" autocomplete="off">
+              </label>
+            </div>
+            <div id="sample-table" class="data-table"></div>
+            <div id="sample-pagination" class="pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-route="/Breed_identification" hidden>
+        <div class="info-box">
+          <h1 class="page-title">Breed identification</h1>
+          <div class="tabs" data-tabs="breed">
+            <div class="tab-list plain-tabs" role="tablist" aria-label="Breed identification sections">
+              <button role="tab" type="button" data-tab="breed-introduction" aria-selected="true">Introduction</button>
+              <button role="tab" type="button" data-tab="breed-usage" aria-selected="false">Usage</button>
+              <button role="tab" type="button" data-tab="breed-analysis" aria-selected="false">Analysis</button>
+            </div>
+
+            <div class="tab-panel info" role="tabpanel" data-panel="breed-introduction">
+              <p>
+                This tool is designed to help you identify different breeds of cattle.
+                To determine the best machine learning classification model, we collected
+                49 breeds and 2913 samples mentioned on the home page.
+              </p>
+              <p>
+                After comparing the performance of different models, we found the workflow
+                using RF as feature selector and SVM as classifier has the best performance.
+                For more detailed information on the accuracy of different models and factors
+                influencing the accuracy, please refer to our paper.
+              </p>
+              <p>
+                Here, we provide the classification models with 500 and 2000 SNPs,
+                respectively. You can choose the model according to your data and expectations.
+              </p>
+            </div>
+
+            <div class="tab-panel info" role="tabpanel" data-panel="breed-usage" hidden>
+              <p><strong>1. Preparing the genotype file.</strong></p>
+              <ul>
+                <li>
+                  The genotype file must contain and only contain the SNPs we specify. The
+                  locations of them based on <strong>ARS-UCD2.0</strong> are available here for
+                  <strong><a href="https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/map_for_Breed_identifier_fast_model.txt" target="_blank" rel="noopener noreferrer">fast model</a></strong>
+                  and
+                  <strong><a href="https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/map_for_Breed_identifier_accurate_model.txt" target="_blank" rel="noopener noreferrer">accurate model</a></strong>.
+                </li>
+                <li>Recoded by <strong>0, 1, and 2</strong>, representing the genotypes AA, AB, and BB, respectively.</li>
+                <li><strong>One individual per line</strong> and <strong>one SNP per column</strong>.</li>
+                <li>The <strong>first column</strong> should be the <strong>sample name</strong>, which is used as index and displayed in the results.</li>
+                <li><strong>Space or tab-separated</strong> text file.</li>
+                <li><strong>Missing values (NA)</strong> do not affect the analysis, but affect the accuracy. We still highly recommend performing <strong>imputation</strong> with BEAGLE before analysis if your data contains missing values.</li>
+                <li>
+                  If you don't have a genotype file now or want to see the details of the file
+                  format, you can download the example file here for
+                  <strong><a href="/examples/genotypes_for_Breed_identifier_fast_model.txt" download>fast model</a></strong>
+                  and
+                  <strong><a href="/examples/genotypes_for_Breed_identifier_accurate_model.txt" download>accurate model</a></strong>.
+                </li>
+              </ul>
+              <p><strong>2. Uploading the genotype file.</strong></p>
+              <ul><li>Click the 'Choose a file' button on the page and select your genotype file.</li></ul>
+              <p><strong>3. Select the model to use for analysis.</strong></p>
+              <ul>
+                <li>There are two models available: '<strong>fast</strong>' and '<strong>accurate</strong>'.</li>
+                <li>The 'fast' model uses 100 SNPs, while the 'accurate' model uses 1000 SNPs.</li>
+                <li>The 'fast' model is recommended for quick analysis, while the 'accurate' model provides more accurate results.</li>
+              </ul>
+              <p><strong>4. Click the 'Analyze' button to predict the breed.</strong></p>
+              <ul><li>You can use the demo file mentioned above to test the tool and see the output details.</li></ul>
+            </div>
+
+            <div class="tab-panel" role="tabpanel" data-panel="breed-analysis" hidden>
+              <div class="analysis-form">
+                <div class="field-label">
+                  <span>Please upload a genotype file to begin analysis.</span>
+                  <a href="/examples/genotypes_for_Breed_identifier_fast_model.txt" download="CBIT-breed-example.txt">Example</a>
+                </div>
+                <label class="upload-demo" data-dropzone="breed-file">
+                  <input id="breed-file" type="file" accept=".txt">
+                  <span class="upload-icon" aria-hidden="true">&#8679;</span>
+                  <span class="upload-copy">
+                    <strong>Drag and drop file here</strong>
+                    <small>Limit 500MB per file</small>
+                  </span>
+                  <span class="browse-button">Browse files</span>
+                </label>
+                <div class="selected-file" id="breed-file-status" hidden></div>
+
+                <label class="form-control">
+                  <span>Choose the model to use for analysis</span>
+                  <select id="breed-model">
+                    <option value="fast" selected>fast</option>
+                    <option value="accurate">accurate</option>
+                  </select>
+                </label>
+                <button id="breed-analyse" class="analyse-button" type="button">Analyse</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="breed-results" class="results" hidden>
+          <div class="results-title">
+            <span>Analysis Results</span>
+            <a id="breed-download" download="CBIT-breed-identification.tsv">Download Result</a>
+          </div>
+          <div id="breed-table" class="data-table"></div>
+          <div id="breed-pagination" class="pagination"></div>
+        </div>
+        <div id="breed-tip" class="tip" hidden><span></span></div>
+      </section>
+
+      <section class="page" data-route="/GBC_estimation" hidden>
+        <div class="info-box">
+          <h1 class="page-title">GBC estimation</h1>
+          <div class="tabs" data-tabs="gbc">
+            <div class="tab-list plain-tabs" role="tablist" aria-label="GBC estimation sections">
+              <button role="tab" type="button" data-tab="gbc-introduction" aria-selected="true">Introduction</button>
+              <button role="tab" type="button" data-tab="gbc-usage" aria-selected="false">Usage</button>
+              <button role="tab" type="button" data-tab="gbc-analysis" aria-selected="false">Analysis</button>
+            </div>
+
+            <div class="tab-panel info" role="tabpanel" data-panel="gbc-introduction">
+              This tool is designed to help you estimate the genomic breed content (GBC)
+              in a mixed breed cattle population.<br>
+              We estimate the GBC using a linear model based on the genotype data:<br>
+              <span class="inline-equation"><i>y</i> = <i>Fb</i> + <i>e</i></span><br>
+              where <i>y</i> is the genotype vector (<i>M</i> × 1) of all <i>M</i> SNPs of
+              the individual to be estimated, and the SNP genotypes are represented by 0
+              (AA), 1 (AB), and 2 (BB) respectively. <i>F</i> is the allele frequency
+              matrix with <i>M</i> × <i>T</i>, where <i>T</i> is the number of breeds in
+              the reference population. The regression coefficient vector <i>b</i>
+              (<i>T</i> × 1) is the GBC of each breed to the individual to be estimated.
+              <i>e</i> is the error term.<br>
+              Then, we solve the linear model using <strong>ordinary least squares (OLS)
+              regression</strong>, where
+              <span class="equation">b&#770; = (F&#8242;F)<sup>&minus;1</sup>F&#8242;y</span>.<br>
+              Finally, we normalize the regression coefficients to sum to 1 and filter out
+              minor contributions based on a confidence threshold.
+            </div>
+
+            <div class="tab-panel info" role="tabpanel" data-panel="gbc-usage" hidden>
+              <p><strong>1. Upload the genotype file.</strong></p>
+              <ul>
+                <li>A genotype file (<strong>recoded by 0, 1 and 2</strong>) is needed with <strong>one individual per column</strong> and <strong>one SNP per line</strong>. The first column should be the SNP ID (CHR:POS) based on <strong>ARS-UCD2.0</strong> and the first row should be the sample ID.</li>
+                <li>The file should be in the format of a <strong>space or tab-separated</strong> text file.</li>
+                <li>More accurate results depend on more SNPs. We recommend using a file with <strong>at least 1000 SNPs</strong>, and <strong>50,000 SNPs</strong> above are highly recommended.</li>
+                <li><strong>Missing values (NA)</strong> do not affect the analysis, but the more missing values, the less accurate the results. So, we highly recommend performing <strong>imputation</strong> with BEAGLE before analysis if your data contains missing values.</li>
+                <li>If you don't have a genotype file now or want to see the details of the file format, you can download the example file <strong><a href="/examples/genotypes_for_GBC_extimator.txt" download>here</a></strong>.</li>
+              </ul>
+              <p><strong>2. Set the confidence threshold to filter out minor contributions.</strong></p>
+              <ul>
+                <li>The minor contributions will be filtered out based on the confidence threshold you set.</li>
+                <li>A larger threshold will exclude the interference from irrelevant breeds, but there is also a risk of overestimating the true contributions of some breeds. Smaller thresholds have the opposite effect.</li>
+                <li>By experience, a threshold between <strong>0.02</strong> (using about 200,000 SNPs) and <strong>0.1</strong> (5,000 SNPs below) is appropriate. We recommend a threshold of <strong>0.05</strong> by default, it can be changed according to your data and expectations.</li>
+              </ul>
+              <p><strong>3. Click the 'Analyze' button to estimate the GBC.</strong></p>
+              <ul>
+                <li>The analysis will take a few seconds to complete, depending on the size of the genotype file.</li>
+                <li>Based on prior exprience, a file with 100 samples and 200,000 SNPs will take about 150 seconds (<strong>one sample every 1.5 seconds</strong>).</li>
+                <li>Smaller sample size and SNPs dataset will take less time.</li>
+              </ul>
+              <p><strong>4. The results will be displayed as a table, showing the GBC of each breed for each individual.</strong></p>
+              <ul>
+                <li>Only breeds in our reference population can be estimated and displayed, details can be found in sample info table of the home page.</li>
+                <li>You can save the results as a CSV file by click the download button in the upper right corner.</li>
+                <li>A demo result file can be downloaded <strong><a href="https://raw.githubusercontent.com/guoyingwei6/CBIT/develop/attachments/GBC_results.csv" target="_blank" rel="noopener noreferrer">here</a></strong>.</li>
+              </ul>
+            </div>
+
+            <div class="tab-panel" role="tabpanel" data-panel="gbc-analysis" hidden>
+              <div class="analysis-form">
+                <div class="field-label">
+                  <span>Step1: Upload your genotype file</span>
+                  <a href="/examples/genotypes_for_GBC_extimator.txt" download="CBIT-GBC-example.txt">Example</a>
+                </div>
+                <label class="upload-demo" data-dropzone="gbc-file">
+                  <input id="gbc-file" type="file" accept=".txt">
+                  <span class="upload-icon" aria-hidden="true">&#8679;</span>
+                  <span class="upload-copy">
+                    <strong>Drag and drop file here</strong>
+                    <small>Limit 500MB per file</small>
+                  </span>
+                  <span class="browse-button">Browse files</span>
+                </label>
+                <div class="selected-file" id="gbc-file-status" hidden></div>
+
+                <label class="form-control">
+                  <span>Step2: Set the confidence threshold</span>
+                  <input id="gbc-threshold" type="number" min="0.01" max="1" step="0.01" value="0.05">
+                </label>
+                <button id="gbc-analyse" class="analyse-button" type="button">Analyse</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="gbc-results" class="results" hidden>
+          <div class="results-title">
+            <span>Analysis Results</span>
+            <a id="gbc-download" download="CBIT-GBC-result.csv">Download Result</a>
+          </div>
+          <div id="gbc-table" class="data-table wide-table"></div>
+          <div id="gbc-pagination" class="pagination"></div>
+        </div>
+        <div id="gbc-tip" class="tip" hidden><span></span></div>
+      </section>
+
+      <section class="page about-page" data-route="/About" hidden>
+        <h1 class="page-title">About</h1>
+        <div class="info">Welcome to CBIT for breed identification and GBC estimation.</div>
+        <h2>Summary</h2>
+        <p>We developed CBIT to help users perform breed identification and GBC estimation.</p>
+        <p>
+          For breed identification, we compared the identification accuracies of different
+          machine learning models. We selected the SVM model as the best model and applied
+          in this tool. More details can be accessed in our paper.
+        </p>
+        <p>
+          For GBC estimation, we used the LR model to inference the GBC of each breed.
+          There two pros compared to the supervised admixture model: (1) Reference free.
+          We use all samples in our dataset as the reference population, and users only
+          need to provide the genotype file of the individual to be tested to perform GBC
+          estimation. (2) Fast speed. Results can be obtained in few seconds for each sample.
+        </p>
+        <h2>Contact</h2>
+        <p>
+          If you have any questions, please contact us at:
+          <a href="mailto:yingwei.guo@foxmail.com">yingwei.guo@foxmail.com</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      All rights reserved. &copy; Institute of Animal Science (IAS) of Chinese Academy of
+      Agricultural Sciences (CAAS). Contact us at
+      <a href="mailto:yingwei.guo@foxmail.com">yingwei.guo@foxmail.com</a>
+    </footer>
+
+    <div id="map-tooltip" class="map-tooltip" hidden></div>
+    <div id="loading" class="loading-overlay" hidden>
+      <div class="spinner" aria-hidden="true"></div>
+      <span>Loading</span>
+    </div>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

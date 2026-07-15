@@ -1,0 +1,14 @@
+*
+!services/
+!services/gbc/
+!services/gbc/app/
+!services/gbc/app/**
+!services/gbc/scripts/
+!services/gbc/scripts/prepare_reference.py
+!services/gbc/Dockerfile
+!services/gbc/requirements.txt
+!app.bak/
+!app.bak/public/
+!app.bak/public/gbc/
+!app.bak/public/gbc/gbc-reference.json
+!app.bak/public/gbc/gbc-reference-*.bin.gz

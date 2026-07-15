@@ -1,0 +1,17 @@
+substitutions:
+  _LOCATION: asia-east1
+  _REPOSITORY: cbit
+  _TAG: latest
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --file
+      - services/gbc/Dockerfile
+      - --tag
+      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/gbc:${_TAG}
+      - .
+
+images:
+  - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/gbc:${_TAG}

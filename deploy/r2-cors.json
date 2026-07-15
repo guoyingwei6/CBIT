@@ -1,0 +1,24 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "https://cattlebreeds.tech",
+          "https://www.cattlebreeds.tech",
+          "http://localhost:8080"
+        ],
+        "methods": [
+          "PUT"
+        ],
+        "headers": [
+          "Content-Type",
+          "x-amz-meta-declared-size"
+        ]
+      },
+      "exposeHeaders": [
+        "ETag"
+      ],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}
