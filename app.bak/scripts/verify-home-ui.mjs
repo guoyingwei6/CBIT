@@ -32,6 +32,38 @@ try {
     "The sample map did not render"
   );
 
+  const inspectMap = async (label, width, height) => {
+    await driver.manage().window().setRect({ width, height });
+    await driver.sleep(200);
+    const layout = await driver.executeScript(`
+      const canvas = document.querySelector('#canvas');
+      const canvasBox = canvas.getBoundingClientRect();
+      const countryBoxes = [...document.querySelectorAll('.map-country')]
+        .map((country) => country.getBoundingClientRect());
+      const left = Math.min(...countryBoxes.map((box) => box.left));
+      const top = Math.min(...countryBoxes.map((box) => box.top));
+      const right = Math.max(...countryBoxes.map((box) => box.right));
+      const bottom = Math.max(...countryBoxes.map((box) => box.bottom));
+      return {
+        canvasRatio: canvasBox.width / canvasBox.height,
+        countryRatio: (right - left) / (bottom - top),
+        verticalFill: (bottom - top) / canvasBox.height,
+      };
+    `);
+    if (Math.abs(layout.canvasRatio - 2.4) > 0.03) {
+      throw new Error(`${label} map container ratio is ${layout.canvasRatio.toFixed(3)}`);
+    }
+    if (layout.countryRatio < 2.5 || layout.countryRatio > 2.7) {
+      throw new Error(`${label} world geometry ratio is ${layout.countryRatio.toFixed(3)}`);
+    }
+    if (layout.verticalFill < 0.85) {
+      throw new Error(`${label} world map only fills ${(layout.verticalFill * 100).toFixed(1)}% vertically`);
+    }
+    return layout;
+  };
+  const portraitMap = await inspectMap("900x1600", 900, 1600);
+  const landscapeMap = await inspectMap("1440x810", 1440, 810);
+
   const tableTab = await driver.findElement(
     By.xpath("//*[@role='tab' and normalize-space(.)='Sample info table']")
   );
@@ -94,7 +126,9 @@ try {
   );
   console.log(
     `Home UI: pass, ${state.mapPaths} map paths, ${state.tableRows} visible rows, ` +
-      `49 breed records, PCA ready, static download ready, 0 Django data requests`
+      `49 breed records, PCA ready, static download ready, 0 Django data requests; ` +
+      `map ratios ${portraitMap.countryRatio.toFixed(3)} portrait / ` +
+      `${landscapeMap.countryRatio.toFixed(3)} landscape`
   );
 } finally {
   await driver.quit();

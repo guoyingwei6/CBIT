@@ -289,16 +289,48 @@ function svgElement(name, attributes = {}) {
   return element;
 }
 
-function project([longitude, latitude], width, height) {
-  const lat = Math.max(-85, Math.min(85, latitude));
-  const radians = (lat * Math.PI) / 180;
-  return [
-    ((longitude + 180) / 360) * width,
-    ((1 - Math.log(Math.tan(Math.PI / 4 + radians / 2)) / Math.PI) / 2) * height,
+function visitCoordinates(coordinates, callback) {
+  if (typeof coordinates?.[0] === "number") {
+    callback(coordinates);
+    return;
+  }
+  coordinates?.forEach((child) => visitCoordinates(child, callback));
+}
+
+function createMapProjection(world, width, height, padding = 20) {
+  const bounds = {
+    minLongitude: Infinity,
+    maxLongitude: -Infinity,
+    minLatitude: Infinity,
+    maxLatitude: -Infinity,
+  };
+  world.features.forEach((feature) => {
+    visitCoordinates(feature.geometry?.coordinates, ([longitude, latitude]) => {
+      bounds.minLongitude = Math.min(bounds.minLongitude, longitude);
+      bounds.maxLongitude = Math.max(bounds.maxLongitude, longitude);
+      bounds.minLatitude = Math.min(bounds.minLatitude, latitude);
+      bounds.maxLatitude = Math.max(bounds.maxLatitude, latitude);
+    });
+  });
+
+  const longitudeSpan = bounds.maxLongitude - bounds.minLongitude;
+  const latitudeSpan = bounds.maxLatitude - bounds.minLatitude;
+  const scale = Math.min(
+    (width - padding * 2) / longitudeSpan,
+    (height - padding * 2) / latitudeSpan
+  );
+  const mapWidth = longitudeSpan * scale;
+  const mapHeight = latitudeSpan * scale;
+  const offsetX = (width - mapWidth) / 2 - bounds.minLongitude * scale;
+  const offsetY = (height - mapHeight) / 2 + bounds.maxLatitude * scale;
+
+  return ([longitude, latitude]) => [
+    offsetX + Number(longitude) * scale,
+    offsetY - Number(latitude) * scale,
   ];
 }
 
-function geometryPath(geometry, width, height) {
+function geometryPath(geometry, projectCoordinate) {
   const polygons = geometry.type === "Polygon"
     ? [geometry.coordinates]
     : geometry.type === "MultiPolygon"
@@ -307,7 +339,7 @@ function geometryPath(geometry, width, height) {
   return polygons.map((polygon) =>
     polygon.map((ring) =>
       ring.map((coordinate, index) => {
-        const [x, y] = project(coordinate, width, height);
+        const [x, y] = projectCoordinate(coordinate);
         return `${index ? "L" : "M"}${x.toFixed(2)},${y.toFixed(2)}`;
       }).join("") + "Z"
     ).join("")
@@ -319,20 +351,25 @@ function renderMap(rows, world) {
   const height = 500;
   const canvas = document.querySelector("#canvas");
   const tooltip = document.querySelector("#map-tooltip");
-  const svg = svgElement("svg", { viewBox: `0 0 ${width} ${height}`, role: "img" });
+  const projectCoordinate = createMapProjection(world, width, height);
+  const svg = svgElement("svg", {
+    viewBox: `0 0 ${width} ${height}`,
+    preserveAspectRatio: "xMidYMid meet",
+    role: "img",
+  });
   const viewport = svgElement("g");
   const countries = svgElement("g");
   const sites = svgElement("g");
 
   world.features.forEach((feature) => {
-    const pathData = geometryPath(feature.geometry, width, height);
+    const pathData = geometryPath(feature.geometry, projectCoordinate);
     if (!pathData) return;
     const path = svgElement("path", { d: pathData, class: "map-country" });
     countries.append(path);
   });
 
   rows.forEach((row) => {
-    const [cx, cy] = project([row["Longitude (E)"], row["Latitude (N)"]], width, height);
+    const [cx, cy] = projectCoordinate([row["Longitude (E)"], row["Latitude (N)"]]);
     const circle = svgElement("circle", {
       cx,
       cy,
