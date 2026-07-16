@@ -3,6 +3,7 @@
     {
       "allowed": {
         "origins": [
+          "https://cbit-serverless.pages.dev",
           "https://cattlebreeds.tech",
           "https://www.cattlebreeds.tech",
           "http://localhost:8080"

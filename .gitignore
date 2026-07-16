@@ -6,6 +6,7 @@ __pycache__/
 *.log
 .idea/
 .vscode/
+.wrangler/
 app.bak/node_modules/
 app.bak/dist/
 app.bak/public/ort/
