@@ -1,5 +1,5 @@
 const DEFAULT_MAX_SAMPLES = 100;
-const DEFAULT_TIMEOUT_MS = 45_000;
+const DEFAULT_TIMEOUT_MS = 120_000;
 
 function assetUrl(path) {
   return new URL(`/${path}`, window.location.origin).href;
